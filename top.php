@@ -1,12 +1,10 @@
 <?php
 $config = include (__DIR__ . '/config.php');
 
-$ts = isset($_GET['ts']) ? $_GET['ts'] : (time() - 3600 * 24 * 7);
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;
-$pos = isset($_GET['pos']) ? $_GET['pos'] : 5;
-$neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
+$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
 ?>
-<form action="./search.php">
+<form action="./top.php">
 	Channel:
 	<select name="channel_id">
 		<?php foreach ($config['channels'] as $channel_id_opt => $cnannel_name) :?>
@@ -15,12 +13,9 @@ $neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
 			</option>
 		<?php endforeach; ?>
 	</select>
+	Limit: <input name='limit' value='<?=$limit?>'> <br />
 	<br />
-	Timestamp > :<input name="ts" value="<?=$ts?>"> <br />
-	Positive reactions > (0 - ignore):<input name="pos" value="<?=$pos?>"> <br />
-	Negative reactions < (0 - ignore):<input name="neg" value="<?=$neg?>"> <br />
-
-	<input type="submit" value="Search">
+	<input type="submit" value="Get top">
 </form>
 
 <?php
@@ -28,19 +23,7 @@ if (isset($channel_id))
 {
 	$db = new SQLite3('dumps/db.sqlite');
 	$sql = "SELECT * FROM messages WHERE channel_id = '" . $channel_id . "'";
-	if ($ts)
-	{
-		$sql .= " AND ts > $ts";
-	}
-	if ($pos)
-	{
-		$sql .= " AND positive_reaction_cnt > $pos";
-	}
-	if ($neg)
-	{
-		$sql .= " AND negative_reaction_cnt < $neg";
-	}
-	$sql .= " ORDER BY ts DESC, ts_float DESC";
+	$sql .= " ORDER BY positive_reaction_cnt DESC, ts DESC, ts_float DESC LIMIT $limit";
 
 	$res = $db->query($sql);
 
