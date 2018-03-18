@@ -56,7 +56,7 @@ foreach ($channels as $channel_id => $channel_name)
 		$header = <<<EOD
 :authority:opendatascience.slack.com
 :method:POST
-:path:/api/conversations.history?_x_id=a2ae9949-1521371747.917
+:path:$url
 :scheme:https
 accept:*/*
 accept-encoding:gzip, deflate, br
