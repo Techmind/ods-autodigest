@@ -12,7 +12,7 @@ $res1 = $db->query("CREATE TABLE IF NOT EXISTS messages
 (id string PRIMARY KEY NOT NULL, 
 channel_id CHAR(8) NOT NULL,
 positive_reaction_cnt INT NOT NULL,
-negative_reaction_cnt INT NOY NULL,
+negative_reaction_cnt INT NOT NULL,
 body TEXT,
 ts INTEGER,
 ts_float INTEGER)");
