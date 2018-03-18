@@ -1,23 +1,58 @@
 <?php
 
+include('vendor/autoload.php');
+
 $config = include ( __DIR__ . '/config.php');
 
 $channels = $config['channels'];
 $positive_reactions = $config['positive_reactions'];
 $negative_reactions = $config['negative_reactions'];
 
-$db = new SQLite3('dumps/db.sqlite');
+$client = Elasticsearch\ClientBuilder::create()->build();
 
-$res1 = $db->query("CREATE TABLE IF NOT EXISTS messages
-(id string PRIMARY KEY NOT NULL, 
-channel_id CHAR(8) NOT NULL,
-positive_reaction_cnt INT NOT NULL,
-negative_reaction_cnt INT NOT NULL,
-body TEXT,
-ts INTEGER,
-ts_float INTEGER)");
+$params = [
+	'index' => 'messages',
+	'body' => [
+		'settings' => [
+			'number_of_shards' => 1,
+			'number_of_replicas' => 0
+		],
+		'mappings' => [
+			'message' => [
+				'_source' => [
+					'enabled' => true
+				],
+				'properties' => [
+					'body' => [
+						'type' => 'text',
+						'analyzer' => 'russian',
+						'term_vector' => 'yes',
+						'copy_to' => 'combined'
+					],
+					'ts' => [
+						'type' => 'long',
+					],
+					'channel_id' => [
+						'type' => 'keyword',
+					],
+					'positive_reaction_cnt' => [
+						'type' => 'integer',
+					],
+					'negative_reaction_cnt' => [
+						'type' => 'integer',
+					],
+					'total_reaction_cnt' => [
+						'type' => 'integer',
+					],
+				]
+			],
+		]
+	]
+];
 
-$res2 = $db->query("CREATE INDEX search_ts ON messages ('channel_id', 'ts')");
+
+// Create the index with mappings and settings now
+$response = $client->indices()->create($params);
 
 $files = glob("dumps/*.js");
 
@@ -27,6 +62,8 @@ foreach ($files as $file)
 	list($channel_id) = explode('.', $channel_id_js);
 
 	$channel_name = $channels[$channel_id];
+
+	echo "Indexing: $channel_name\n";
 
 	$messages = json_decode(file_get_contents($file), true);
 
@@ -44,11 +81,12 @@ foreach ($files as $file)
 		{
 			var_dump($message);die;
 		}
-		$id = $channel_id . "-" . $message['user'] . "-" . $message['ts'];
 		list($ts, $ts_float) = explode('.', $message['ts']);
 		$ts_float = floatval("0.$ts_float") * 1000000;
 
-		$neg = $pos = 0;
+		$id = $channel_id . '-' . $message['ts'] . "-" . $message['user'].
+
+		$total = $neg = $pos = 0;
 
 		if (isset($message['reactions']))
 		{
@@ -62,12 +100,26 @@ foreach ($files as $file)
 				{
 					$neg += intval($reaction['count']);
 				}
+
+				$total += intval($reaction['count']);
 			}
 		}
 
-		$res3 = $db->query("
-			INSERT INTO messages (id, channel_id, positive_reaction_cnt, negative_reaction_cnt, body, ts, ts_float)
-			VALUES 
-			('$id', '$channel_id', '$pos', '$neg', '".SQLite3::escapeString($body)."', '$ts', '$ts_float')");
+		$params = [
+			'index' => 'messages',
+			'type' => 'message',
+			'id' => $id,
+			'body' => [
+				'body' => $body,
+				'ts' => intval($ts),
+				'positive_reaction_cnt' => $pos,
+				'negative_reaction_cnt' => $neg,
+				'total_reaction_cnt' => $total,
+				'channel_id' => $channel_id
+			]
+		];
+
+
+		$resp = $client->index($params);
 	}
 }

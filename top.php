@@ -1,4 +1,6 @@
 <?php
+include('vendor/autoload.php');
+
 $config = include (__DIR__ . '/config.php');
 
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;
@@ -21,17 +23,41 @@ $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
 <?php
 if (isset($channel_id))
 {
-	$db = new SQLite3('dumps/db.sqlite');
-	$sql = "SELECT * FROM messages WHERE channel_id = '" . $channel_id . "'";
-	$sql .= " ORDER BY positive_reaction_cnt DESC, ts DESC, ts_float DESC LIMIT $limit";
 
-	$res = $db->query($sql);
+	$db = Elasticsearch\ClientBuilder::create()->build();
+	$params = [
+		'index' => 'messages',
+		'type' => 'message',
+		'body' => [
+			'size' => $limit,
+			'query' => [
+				'bool' => [
+					'must' => [
+						'term' => [ 'channel_id' => $channel_id ]
+					],
+				]
+			],
+			'sort' => [
+				['positive_reaction_cnt' => 'desc']
+			]
+		]
+	];
 
-	$rows = [];
+	try
+	{
+		$resp = $db->search($params);
 
-	while($row = $res->fetchArray(SQLITE3_ASSOC)){
-		$rows[] = $row;
+		$rows = [];
+
+		foreach ($resp['hits']['hits'] as $hit)
+		{
+			$rows[] = $hit['_source'];
+		}
+	} catch (\Exception $e)
+	{
+		var_dump($e);die;
 	}
+
 
 	include(__DIR__ . '/template.php');
 }

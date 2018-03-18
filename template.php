@@ -1,4 +1,5 @@
 <?php
+$emojis = $config['emojis'];
 foreach ($rows as $row)
 {
 	$body = json_decode($row['body'], true);
@@ -9,7 +10,8 @@ foreach ($rows as $row)
 		{
 			$name = $react['name'];
 			$cnt = $react['count'];
-			$reactions_html .= " :$name: ($cnt)";
+			$name_html = isset($emojis[$name]) ? "<img height='24px' src='".$emojis[$name]."'>" : ":$name:";
+			$reactions_html .= " $name_html ($cnt)";
 		}
 	}
 
@@ -39,5 +41,16 @@ foreach ($rows as $row)
 //		$debug = '<pre>' . $row['body'] . '</pre>';
 	$date = date('Y-m-d H:i:s', $body['ts']);
 
-	echo "<p><a href='$message_url'>GOTO</a> $date : <span style='color: green'>".$row['positive_reaction_cnt']."</span>/<span style='color: red'>".$row['negative_reaction_cnt']."</span> ".$text." <br /> $reactions_html $debug</p>";
+	$user = isset($users[$body['user']]) ? $users[$body['user']] : null;
+
+	if ($user)
+	{
+		$user_html = "<img height='24px' src='".$user['image_72']."'/> " . $user['name'];
+	} else {
+		$user_html = "@" . $body['user'];
+	}
+
+	echo "<p><a href='$message_url'>GOTO</a> 
+	<br /> 	$date $user_html: <br /> 
+	<span style='color: green'>".$row['positive_reaction_cnt']."</span>/<span style='color: red'>".$row['negative_reaction_cnt']."</span> ".$text." <br /> $reactions_html $debug</p>";
 }
