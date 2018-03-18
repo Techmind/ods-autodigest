@@ -3,13 +3,16 @@
 include('vendor/autoload.php');
 
 $config = include (__DIR__ . '/config.php');
+include (__DIR__ . '/shared.php');
 
-$ts = isset($_GET['ts']) ? $_GET['ts'] : (time() - 3600 * 24 * 7);
+$ts = isset($_GET['ts']) ? $_GET['ts'] : (time() - 3600 * 24 * 7 * 3);
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;
 $pos = isset($_GET['pos']) ? $_GET['pos'] : 5;
 $neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
 ?>
-	<form action="./search-el.php">
+	<a href="./search.php">Search</a> / <a href="./top.php">Top</a> <br />
+
+	<form action="./search.php">
 		Channel:
 		<select name="channel_id">
 			<?php foreach ($config['channels'] as $channel_id_opt => $cnannel_name) :?>
@@ -27,6 +30,7 @@ $neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
 	</form>
 
 <?php
+
 if (isset($channel_id))
 {
 	$db = Elasticsearch\ClientBuilder::create()->build();
@@ -64,7 +68,6 @@ if (isset($channel_id))
 		$params['body']['query']['bool']['must'][] = ['range' => ['negative_reaction_cnt' => ['lte' => $neg]]];
 	}
 
-	$user_ids = [];
 	try
 	{
 		$resp = $db->search($params);
@@ -74,8 +77,6 @@ if (isset($channel_id))
 		foreach ($resp['hits']['hits'] as $hit)
 		{
 			$row = $hit['_source'];
-			$body = json_decode($row['body'], true);
-			$user_ids[$body['user']] = true;
 			$rows[] = $row;
 		}
 	} catch (\Exception $e)
@@ -83,24 +84,7 @@ if (isset($channel_id))
 		var_dump($e);die;
 	}
 
-	$users = [];
-	// get users
-	$mget_params = [
-		'index' => 'users',
-		'type' => 'user',
-		'body' => [
-			'ids' => array_keys($user_ids)
-		]
-	];
-	$mget_users = $db->mget($mget_params);
-
-	foreach ($mget_users['docs'] as $user)
-	{
-		if ($user['found'])
-		{
-			$users[$user['_id']] = $user['_source'];
-		}
-	}
+	$users = get_users($rows, $db);
 
 	include(__DIR__ . '/template.php');
 }

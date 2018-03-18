@@ -10,7 +10,7 @@ foreach ($rows as $row)
 		{
 			$name = $react['name'];
 			$cnt = $react['count'];
-			$name_html = isset($emojis[$name]) ? "<img height='24px' src='".$emojis[$name]."'>" : ":$name:";
+			$name_html = isset($emojis[$name]) ? "<img title=':$name:' height='24px' src='".$emojis[$name]."'>" : ":$name:";
 			$reactions_html .= " $name_html ($cnt)";
 		}
 	}
@@ -50,7 +50,8 @@ foreach ($rows as $row)
 		$user_html = "@" . $body['user'];
 	}
 
-	echo "<p><a href='$message_url'>GOTO</a> 
-	<br /> 	$date $user_html: <br /> 
-	<span style='color: green'>".$row['positive_reaction_cnt']."</span>/<span style='color: red'>".$row['negative_reaction_cnt']."</span> ".$text." <br /> $reactions_html $debug</p>";
+	echo "<p><a href='$message_url'>GOTO</a> <br /> 
+	$date 
+	<span style='color: green'>".$row['positive_reaction_cnt']."</span>/<span style='color: black'>".$row['total_reaction_cnt']."</span>/<span style='color: red'>".$row['negative_reaction_cnt']."</span> 
+	<br /> $user_html: $text <br /> $reactions_html $debug</p>";
 }

@@ -51,8 +51,13 @@ $params = [
 ];
 
 
-// Create the index with mappings and settings now
-$response = $client->indices()->create($params);
+try
+{
+	$response = $client->indices()->create($params);
+} catch (\Exception $e)
+{
+	// ignore re-creation error
+}
 
 $files = glob("dumps/*.js");
 

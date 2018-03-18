@@ -56,8 +56,13 @@ $params = [
 
 
 
-// Create the index with mappings and settings now
-//$response = $client->indices()->create($params);
+try
+{
+	$response = $client->indices()->create($params);
+} catch (\Exception $e)
+{
+	// ignore re-creation error
+}
 
 $cursor = null;
 
@@ -134,4 +139,4 @@ EOD;
 	$cursor = $response['response_metadata']['next_cursor'];
 
 	var_dump([$count, $cursor]);
-} while (count($response['members']) > 1);
+} while (count($response['members']) > 1 && $cursor);
