@@ -169,7 +169,12 @@ function getLastIndexed($client, $index, $type, $condition, $ts_field = 'ts')
 			]
 		]
 	]);
-	$last_found = $latest_msg['hits']['hits'][0]['_source'];
+	if (!empty($latest_msg['hits']['hits'][0]))
+	{
+		$last_found = $latest_msg['hits']['hits'][0]['_source'];
+	} else {
+		$last_found = null;
+	}
 
 	return array($latest_msg, $last_found);
 }

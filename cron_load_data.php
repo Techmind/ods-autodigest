@@ -33,7 +33,7 @@ $responseUsers = createUsersIndex($client);
 
 $time = microtime(true);
 
-// [TODO] load channels + save channels stats (num users ?)
+// [TODO] load all channels to EL + save channels stats (num users ?)
 
 echo date('Y-m-d H:i:s') ." loading new messages\n";
 
@@ -58,6 +58,8 @@ foreach ($channels as $channel_id => $channel_name)
 
 	echo date('Y-m-d H:i:s') . " $real messages from '$channel_name' saved to index\n";
 }
+
+//die();
 
 echo date('Y-m-d H:i:s') ." re-loading users\n";
 

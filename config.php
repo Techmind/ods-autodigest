@@ -4,7 +4,9 @@
 		'C04PE5M8V' => 'interesting_links',
 		'C047H3N8L' => 'deep_learning',
 		'C0SGCGB52' => 'career',
-		// 'C040HKJF1' => '_random_talks'
+		'C040HKJF1' => '_random_talks',
+		'C04DA5FUF' => '_jobs',
+		'C047H3DP4' => 'theory_and_practice',
 	],
 	'positive_reactions' => [
 		'fire', 'fireball', 'heavy_plus_sign', 'notbad', 'muscle', 'muscle::skin-tone-6', 'take-my-money', 'joy', 'feelsgoodmeme',
