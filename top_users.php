@@ -2,7 +2,7 @@
 include(__DIR__ . '/vendor/autoload.php');
 include(__DIR__ . '/lib/incl.php');
 
-$config = include (__DIR__ . '/config//config.php');
+$config = include (__DIR__ . '/config/config.php');
 
 $type = isset($_GET['$type']) ? $_GET['$type'] : null;
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
@@ -35,6 +35,7 @@ $options = [
 	<input type="submit" name="type" value="total">
 </form>
 
+TODO!
 <?php
 $header = ob_get_clean();
 
