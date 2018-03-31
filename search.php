@@ -3,7 +3,7 @@
 include(__DIR__ . '/vendor/autoload.php');
 include(__DIR__ . '/lib/incl.php');
 
-$config = include (__DIR__ . '/config.php');
+$config = include (__DIR__ . '/config/config.php');
 
 $ts = isset($_GET['ts']) ? $_GET['ts'] : (time() - 3600 * 24 * 7 * 3);
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;

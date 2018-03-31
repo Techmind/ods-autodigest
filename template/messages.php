@@ -50,6 +50,7 @@ foreach ($rows as $row)
 			}
 		}
 	}
+	// [TODO] handel links to channels/users correctly on render
 	$text = preg_replace('~<([^>]*)>~', "<a href='$1'>$1</a>", $text);
 
 	//replace user names

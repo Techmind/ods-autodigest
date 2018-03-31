@@ -1,13 +1,13 @@
 <?php
-include(__DIR__ . '/vendor/autoload.php');
-include(__DIR__ . '/lib/incl.php');
+include(__DIR__ . '/../vendor/autoload.php');
+include(__DIR__ . '/../lib/incl.php');
 
 
-$config = include (__DIR__ . '/config.php');
+$config = include(__DIR__ . '/../config/config.php');
 
-if (file_exists('.mine.cookie.php'))
+if (file_exists(__DIR__ . '/../config/.mine.cookie.php'))
 {
-	$file = include('.mine.cookie.php');
+	$file = include(__DIR__ . '/../config/.mine.cookie.php');
 	list($cookie, $token, $uid) = $file;
 } else {
 	if ($argc < 3)

@@ -2,7 +2,7 @@
 include(__DIR__ . '/vendor/autoload.php');
 include(__DIR__ . '/lib/incl.php');
 
-$config = include (__DIR__ . '/config.php');
+$config = include (__DIR__ . '/config/config.php');
 
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;

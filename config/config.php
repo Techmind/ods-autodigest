@@ -8,6 +8,10 @@
 		'C04DA5FUF' => '_jobs',
 		'C047H3DP4' => 'theory_and_practice',
 	],
+	// do not count stats from this channel for reactions purpose
+	'channels_stats_ignore' => [
+		'C040HKJF1'
+	],
 	'positive_reactions' => [
 		'fire', 'fireball', 'heavy_plus_sign', 'notbad', 'muscle', 'muscle::skin-tone-6', 'take-my-money', 'joy', 'feelsgoodmeme',
 		// wtf ?
@@ -23,7 +27,7 @@
 		'heavy_minus_sign', 'wtf', 'hankey',
 		// jobs related
 		'chains', 'bombanoolo', 'harold', 'genious', 'pepe_sad', 'mickey', 'no',
-		'knife_fork_plate'
+		'knife_fork_plate', 'parrotpoop'
 	],
 	'emojis' => [
 		"bowtie" => "https:\/\/emoji.slack-edge.com\/T040HKJE3\/bowtie\/f3ec6f2bb0.png",

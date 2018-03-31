@@ -11,7 +11,9 @@
 	</head>
 
 	<body>
-		<a href="./search.php">Search</a> / <a href="./top.php">Top</a> <br />
+		<a href="./search.php">Search</a> /
+		<a href="./top.php">Top (messages)</a> /
+		<a href="./top_users.php">Top (users)</a> <br />
 
 		<?=$header?>
 
