@@ -76,5 +76,5 @@ if (isset($channel_id))
 
 	$users = get_users($rows, $db);
 
-	include(__DIR__ . '/template.php');
+	include(__DIR__ . '/render_messages.php');
 }

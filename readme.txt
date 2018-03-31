@@ -12,5 +12,31 @@ most interesting message by day/week per channel:
 
 same for links ?
 
+UI:
 2) bootstrap + better controls for timestamps
+2.5) sort and highlight negative/positive reactions in render
 3) backend and/or js framework
+
+4) add https://opendatascience.slack.com/archives/C04N3UMSL/p1522148026000368 and fidn most toxic/controversial comments(срачико-детектор =)!!!), people, themes
+4.1) sort/highlight messages by postivness/negativness
+4.5) use "4" to detect positivness/negativness of emojis, drop emojis from configs
+5) find and ignore polls from reactions/nagativness detection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.................
+
+101) test same stuff(sentient/negatvity/reactions) ^ on facebook messages
