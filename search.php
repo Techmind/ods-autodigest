@@ -1,17 +1,18 @@
 <?php
 
-include('vendor/autoload.php');
+include(__DIR__ . '/vendor/autoload.php');
+include(__DIR__ . '/lib/incl.php');
 
 $config = include (__DIR__ . '/config.php');
-include (__DIR__ . '/shared.php');
 
 $ts = isset($_GET['ts']) ? $_GET['ts'] : (time() - 3600 * 24 * 7 * 3);
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;
 $pos = isset($_GET['pos']) ? $_GET['pos'] : 5;
 $neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
-?>
-	<a href="./search.php">Search</a> / <a href="./top.php">Top</a> <br />
 
+$date_formatted = date('Y-m-d H:i:s', $ts);
+ob_start();
+?>
 	<form action="./search.php">
 		Channel:
 		<select name="channel_id">
@@ -22,7 +23,7 @@ $neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
 			<?php endforeach; ?>
 		</select>
 		<br />
-		Timestamp > :<input name="ts" value="<?=$ts?>"> <br />
+		Timestamp > :<input name="ts" value="<?=$ts?>"> (<?=$date_formatted?>) <br />
 		Positive reactions > (0 - ignore):<input name="pos" value="<?=$pos?>"> <br />
 		Negative reactions < (0 - ignore):<input name="neg" value="<?=$neg?>"> <br />
 
@@ -30,6 +31,7 @@ $neg = isset($_GET['neg']) ? $_GET['neg'] : 10;
 	</form>
 
 <?php
+$header = ob_get_clean();
 
 if (isset($channel_id))
 {
@@ -84,7 +86,11 @@ if (isset($channel_id))
 		var_dump($e);die;
 	}
 
-	$users = get_users($rows, $db);
+	$users = getUsers($rows, $db);
 
-	include(__DIR__ . '/render_messages.php');
+	$content = include(__DIR__ . '/template/messages.php');
+} else {
+	$content = '';
 }
+
+include(__DIR__ . '/template/template.php');

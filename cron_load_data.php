@@ -1,10 +1,9 @@
 <?php
+include(__DIR__ . '/vendor/autoload.php');
+include(__DIR__ . '/lib/incl.php');
+
 
 $config = include (__DIR__ . '/config.php');
-include('vendor/autoload.php');
-include('lib/el_funs.php');
-include('lib/api_funs.php');
-include('lib/load_funs.php');
 
 if (file_exists('.mine.cookie.php'))
 {

@@ -1,13 +1,13 @@
 <?php
-include('vendor/autoload.php');
+include(__DIR__ . '/vendor/autoload.php');
+include(__DIR__ . '/lib/incl.php');
 
 $config = include (__DIR__ . '/config.php');
-include (__DIR__ . '/shared.php');
 
 $channel_id = isset($_GET['channel_id']) ? $_GET['channel_id'] : null;
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
+ob_start();
 ?>
-<a href="./search.php">Search</a> / <a href="./top.php">Top</a> <br />
 
 <form action="./top.php">
 	Channel:
@@ -27,6 +27,8 @@ $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
 </form>
 
 <?php
+$header = ob_get_clean();
+
 if (isset($channel_id))
 {
 
@@ -74,7 +76,11 @@ if (isset($channel_id))
 		var_dump($e);die;
 	}
 
-	$users = get_users($rows, $db);
+	$users = getUsers($rows, $db);
 
-	include(__DIR__ . '/render_messages.php');
+	$content = include(__DIR__ . '/template/messages.php');
+} else {
+	$content = '';
 }
+
+include(__DIR__ . '/template/template.php');

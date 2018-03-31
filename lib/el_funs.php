@@ -82,6 +82,12 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 			continue;
 		}
 
+		// ignore join message
+		if (isset($message['text']) && strpos('has joined the channel', $message['text']) !== false)
+		{
+			continue;
+		}
+
 		if (!isset($message['user']))
 		{
 			// [TODO] throw exception
@@ -232,4 +238,58 @@ function createUsersIndex($client)
 		// ignore re-creation error
 	}
 	return $response;
+}
+
+
+/**
+ * @param $rows
+ * @param $db
+ */
+function getUsers($rows, $db)
+{
+	if (empty($rows))
+	{
+		return [];
+	}
+	$user_ids = [];
+
+	foreach ($rows as $row)
+	{
+		$body = json_decode($row['body'], true);
+
+		if (isset($body['text']))
+		{
+			preg_match_all('~@U[0-9A-Z]+~', $body['text'], $matches);
+			foreach ($matches[0] as $match)
+			{
+				$uid = substr($match, 1);
+
+				$user_ids[$uid] = true;
+			}
+		}
+
+		$user_ids[$body['user']] = true;
+	}
+
+
+	$users = [];
+	// get users
+	$mget_params = [
+		'index' => 'users',
+		'type' => 'user',
+		'body' => [
+			'ids' => array_keys($user_ids)
+		]
+	];
+	$mget_users = $db->mget($mget_params);
+
+	foreach ($mget_users['docs'] as $user)
+	{
+		if ($user['found'])
+		{
+			$users[$user['_id']] = $user['_source'];
+		}
+	}
+
+	return $users;
 }
