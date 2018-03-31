@@ -11,7 +11,7 @@ most interesting message by day/week per channel:
 - replies / number of members
 
 1.1) PER user:
-number of messages
+number of messages <- spammers/contributors =)
 number of messages / (DAYS from joining)
 number of channels (joined to / messaged to)
 positive_reactions
