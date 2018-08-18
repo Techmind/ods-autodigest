@@ -80,7 +80,7 @@ foreach ($rows as $row)
 	echo "<p><a href='$message_url'>GOTO</a> <br /> 
 	$date 
 	<span style='color: green'>".$row['positive_reaction_cnt']."</span>/<span style='color: black'>".$row['total_reaction_cnt']."</span>/<span style='color: red'>".$row['negative_reaction_cnt']."</span> 
-	<br /> $user_html: $text <br /> $reactions_html $debug</p>";
+	<br /> $user_html: <pre>$text</pre> <br /> $reactions_html $debug</p>";
 }
 
 return ob_get_clean();

@@ -4,6 +4,9 @@
 
 
 TODO:
+
+0) 'hot topic detection' daily/weekly, by reactions/comment numbers and positivity/negativity, maybe by channel ?
+
 1) features:
 most interesting message by day/week per channel:
 - total # reactions,
@@ -25,6 +28,9 @@ max_negative_reactions of 1 post - worst post
 
 1.2) same for links ?
 
+1.3) per message in thread, find avg number of reactions/comments total/positive/negative (reactions = mii-comments like "this sucks/this is good")
+1.3.1) ignore diffrent positive/negative reactions/comments for SAME USERS
+
 UI:
 2) bootstrap + better controls for timestamps (add calendar to search)
 
@@ -38,6 +44,9 @@ UI:
 
 5) find and ignore polls from reactions/negativness detection (jsut ignore _random_talks for now)
 
+6) 
+
 .................
 
 101) test same stuff(sentient/negatvity/reactions) ^ on facebook messages
+102) test same stuff on youtube comments/likes ^ on youtube channels like bloggers/polit channels 
