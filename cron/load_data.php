@@ -2,23 +2,21 @@
 include(__DIR__ . '/../vendor/autoload.php');
 include(__DIR__ . '/../lib/incl.php');
 
-
 $config = include(__DIR__ . '/../config/config.php');
 
-if (file_exists(__DIR__ . '/../config/.mine.cookie.php'))
-{
-	$file = include(__DIR__ . '/../config/.mine.cookie.php');
-	list($cookie, $token, $uid) = $file;
+if (file_exists(__DIR__ . '/../config/token')) {
+	$token = trim(file_get_contents(__DIR__ . '/../config/token'));
 } else {
 	if ($argc < 3)
 	{
-		die ("usage: php ". basename(__FILE__) . ' $COOKIE $CSRF_TOKEN $UID');
+		die ("usage: php ". basename(__FILE__) . ' $OLD_WEB_API_TOKEN');
 	}
 
-	$cookie = $argv[0];
-	$token = $argv[1];
-	$uid = $argv[2];
+	$token = $argv[0];
 }
+
+$cookie = "";
+$uid = "unused";
 
 $channels = $config['channels'];
 $positive_reactions = $config['positive_reactions'];
@@ -29,6 +27,11 @@ $client = Elasticsearch\ClientBuilder::create()->build();
 $responseMessages = createMessagesIndex($client);
 
 $responseUsers = createUsersIndex($client);
+
+// loading users 1st so we can update them, during message load
+//$count = loadAndIndexSlackUsers($token, $uid, $cookie, $client);
+
+//echo date('Y-m-d H:i:s') ." loaded $count users \n";
 
 $time = microtime(true);
 
@@ -49,6 +52,8 @@ foreach ($channels as $channel_id => $channel_name)
 		$last_ts = 0;
 	}
 
+	//var_dump($decoded);
+
 	$all_messages = loadSlackMessages($channel_id, $token, $cookie, $last_ts, "$uid-$time");
 
 	echo date('Y-m-d H:i:s') ." Loaded: name - $channel_name, cnt - " . count($all_messages) . "\n";
@@ -62,6 +67,3 @@ foreach ($channels as $channel_id => $channel_name)
 
 echo date('Y-m-d H:i:s') ." re-loading users\n";
 
-$count = loadAndIndexSlackUsers($token, $uid, $cookie, $client);
-
-echo date('Y-m-d H:i:s') ." loaded $count users \n";

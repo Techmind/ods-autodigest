@@ -6,9 +6,15 @@
  */
 function createMessagesIndex($client)
 {
-	if ($client->indices()->exists(['index' => 'messages']))
+	try {
+		if ($client->indices()->exists(['index' => 'messages']))
+		{
+			return true;
+		}
+	} catch (Exception $e)
 	{
-		return true;
+		//var_dump('CATCH');die;
+		//var_dump($e);
 	}
 
 	$params = [
@@ -74,6 +80,8 @@ function createMessagesIndex($client)
 function indexMessages($client, $all_messages, $channel_id, $positive_reactions, $negative_reactions, $last_ts)
 {
 	$count = 0;
+	$users_update = [];
+
 	foreach ($all_messages as $message)
 	{
 		if (isset($message['subtype']) &&
@@ -94,6 +102,7 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 			var_dump($message);
 			die;
 		}
+		$user_id = $message['user'];
 
 		$message_ts = $message['ts'];
 
@@ -113,16 +122,40 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 		{
 			foreach ($message['reactions'] as $reaction)
 			{
-				if (in_array($reaction['name'], $positive_reactions))
+				
+				$is_pos = in_array($reaction['name'], $positive_reactions);
+				$is_neg = in_array($reaction['name'], $negative_reactions);
+				if ($is_pos)
 				{
 					$pos += intval($reaction['count']);
 				}
-				else if (in_array($reaction['name'], $negative_reactions))
+				else if ($is_neg)
 				{
 					$neg += intval($reaction['count']);
 				}
 
 				$total += intval($reaction['count']);
+				
+				
+				foreach ($reaction['users'] as $from_uid)
+				{
+					if (!isset($users_update[$from_uid]['from_pos']))
+					{
+						$users_update[$from_uid]['from_pos'] = 0;
+						$users_update[$from_uid]['from_neg'] = 0;
+					}
+					$users_update[$from_uid]['from_pos'] += $is_pos ? 1 : 0;
+					$users_update[$from_uid]['from_neg'] += $is_neg ? 1 : 0;
+				}
+
+				
+				if (!isset($users_update[$user_id]['to_pos']))
+				{
+					$users_update[$user_id]['to_pos'] = 0;
+					$users_update[$user_id]['to_neg'] = 0;
+				}
+				$users_update[$user_id]['to_pos'] += $is_pos ? 1 : 0;
+				$users_update[$user_id]['to_neg'] += $is_neg ? 1 : 0;
 			}
 		}
 
@@ -146,6 +179,40 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 		$count++;
 
 		// [TODO] do not ignore errors
+	}
+	$ids = array_keys($users_update);
+
+	if ($ids)
+	{
+
+		$users = getUsersByIds($ids, $client);
+		$bulk = [];
+
+		foreach ($users_update as $uid => $update_row)
+		{
+			 $bulk['body'][] = [
+                                'index' => [
+                                        '_index' => 'users',
+                                        '_type' => 'user',
+                                        '_id' => $uid
+	                       ]
+        	         ];
+
+                	$row = $users[$uid];
+		
+			foreach ($update_row as $k => $v)
+			{
+				if (!isset($row[$k]))
+				{
+					$row[$k] = 0;
+				}
+				$row[$k] += $v;
+			}
+
+			$bulk['body'][] = $row;
+		}
+
+		$resp = $client->bulk($bulk);
 	}
 
 	return $count;
@@ -191,9 +258,14 @@ function getLastIndexed($client, $index, $type, $condition, $ts_field = 'ts')
  */
 function createUsersIndex($client)
 {
-	if ($client->indices()->exists(['index' => 'users']))
+	try 
 	{
-		return true;
+		if ($client->indices()->exists(['index' => 'users']))
+		{	
+			return true;
+		}
+	} catch (\Exception $e) {
+		var_dump($e);
 	}
 
 	$params = [
@@ -221,7 +293,11 @@ function createUsersIndex($client)
 						'image_72' => [
 							'type' => 'text',
 							"index" => false
-						]
+						],
+						'from_pos' => ['type' => 'integer'],
+						'to_pos' => ['type' => 'integer'],
+						'from_neg' => ['type' => 'integer'],
+						'to_neg' => ['type' => 'integer']
 					]
 				],
 			]
@@ -241,12 +317,9 @@ function createUsersIndex($client)
 }
 
 
-/**
- * @param $rows
- * @param $db
- */
 function getUsers($rows, $db)
 {
+
 	if (empty($rows))
 	{
 		return [];
@@ -271,14 +344,23 @@ function getUsers($rows, $db)
 		$user_ids[$body['user']] = true;
 	}
 
+	return getUsersByIds(array_keys($user_ids), $db);
+}
 
+
+/**
+ * @param $rows
+ * @param $db
+ */
+function getUsersByIds($ids, $db)
+{
 	$users = [];
 	// get users
 	$mget_params = [
 		'index' => 'users',
 		'type' => 'user',
 		'body' => [
-			'ids' => array_keys($user_ids)
+			'ids' => $ids
 		]
 	];
 	$mget_users = $db->mget($mget_params);

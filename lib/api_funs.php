@@ -33,8 +33,9 @@ EOD;
 
 // $output contains the output string
 	$output = curl_exec($ch);
+	$err = curl_error($ch);
 
 // close curl resource to free up system resources
 	curl_close($ch);
-	return $output;
+	return [$output, $err];
 }

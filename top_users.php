@@ -8,13 +8,10 @@ $type = isset($_GET['$type']) ? $_GET['$type'] : null;
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
 ob_start();
 $options = [
-	'messages' => 'messages',
-	'messages_per_day' => 'messages_per_day',
-	'reactions' => 'reactions',
-	'reactions_per_day' => 'reactions_per_day',
-	'max_reactions_for_post' => 'max_reactions_for_post',
-	'channels_joined' => 'channels_joined',
-	'channels_contributed' => 'channels_contributed',
+	'to_pos' => 'Positive reactions to user`s messages',
+	'to_neg' => 'Negative reactions to user`s messages',
+	'from_pos' => 'Positive reactions to messages created',
+	'from_neg' => 'Negative reactions to messages created'
 ];
 ?>
 
@@ -30,12 +27,9 @@ $options = [
 	Limit: <input name='limit' value='<?=$limit?>'> <br />
 	<br />
 	Get top:
-	<input type="submit" name="type" value="positive">
-	<input type="submit" name="type" value="negative">
-	<input type="submit" name="type" value="total">
+	<input type="submit" name="type" value="get">
 </form>
 
-TODO!
 <?php
 $header = ob_get_clean();
 
@@ -43,7 +37,35 @@ if (isset($type))
 {
 
 	$db = Elasticsearch\ClientBuilder::create()->build();
-	// [TODO]
+
+        $params = [
+                'index' => 'users',
+                'type' => 'user',
+                'body' => [
+                        'size' => $limit,
+                        'query' => [
+                                'bool' => [
+                                        'must' => [
+                                        ],
+                                ]
+                        ],
+			'sort' => [
+                                [$type => 'desc']
+                        ]
+                ]
+        ];
+
+	$pos = 1;
+        if ($pos)
+        {
+                $params['body']['query']['bool']['must'][] = ['range' => [$type => ['gte' => $pos]]];
+        }
+
+        $resp = $db->search($params);
+
+	$users = $resp['hits']['hits'];	
+
+	$content =  include(__DIR__ . '/template/users.php');
 } else {
 	$content = '';
 }

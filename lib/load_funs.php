@@ -12,6 +12,8 @@ function loadSlackMessages($channel_id, $token, $cookie, $last_ts, $x_id)
 {
 	$url = "/api/conversations.history?_x_id=$x_id";
 
+	$cookie = "";
+
 	$all_messages = [];
 
 	$latest = null;
@@ -36,7 +38,7 @@ function loadSlackMessages($channel_id, $token, $cookie, $last_ts, $x_id)
 			$post['latest'] = $latest;
 		}
 
-		$output = makeApiReq($url, $cookie, $post);
+		list($output, $err) = makeApiReq($url, $cookie, $post);
 
 		$response = json_decode($output, true);
 
@@ -80,12 +82,46 @@ function loadAndIndexSlackUsers($token, $uid, $cookie, $client)
 
 		$url = "/api/users.list?_x_id=$uid-$time";
 
-		$output = makeApiReq($url, $cookie, $post);
+		$success = false;
+		while (!$success)
+		{
 
-		$response = json_decode($output, true);
+			list($output, $err) = makeApiReq($url, $cookie, $post);
+
+			$response = json_decode($output, true);
+
+			$success = !empty($response['members']);
+
+			if (!$success)
+			{
+				echo "User load failed... retrying in 5 sec!\n";
+				sleep(5);
+			}
+		}
+
+		$bulk = ['body' => []];
 
 		foreach ($response['members'] as $member)
 		{
+			$bulk['body'][] = [
+				'index' => [
+					'_index' => 'users',
+					'_type' => 'user',
+					'_id' => $member['id']
+				]
+			];
+
+			$bulk['body'][] = [
+				'name' => $member['name'],
+                                'real_name' => $member['profile']['real_name'],
+                                'real_name_normalized' => $member['profile']['real_name_normalized'],
+                                'image_72' => $member['profile']['image_72'],
+				'to_pos' => 0,
+				'from_pos' => 0,
+				'to_neg' => 0,
+				'from_neg' => 0
+			];
+/*
 			$params = [
 				'index' => 'users',
 				'type' => 'user',
@@ -97,13 +133,23 @@ function loadAndIndexSlackUsers($token, $uid, $cookie, $client)
 					'image_72' => $member['profile']['image_72'],
 				]
 			];
-
-			$resp = $client->index($params);
+*/
+//			$resp = $client->index($params);
 
 			$count++;
 		}
 
+		$resp = $client->bulk($bulk);
+
+		//var_dump($resp['items'][0]);
+		// making requests too fast will block us on slack api
+		//sleep(2);
+
 		$cursor = $response['response_metadata']['next_cursor'];
+
+		echo /*$output . */" err - " . $err;
+
+		 echo date('Y-m-d H:i:s') ." Loading users $count\n";
 
 	} while (count($response['members']) > 1 && $cursor);
 
