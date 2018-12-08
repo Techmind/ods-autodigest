@@ -29,9 +29,9 @@ $responseMessages = createMessagesIndex($client);
 $responseUsers = createUsersIndex($client);
 
 // loading users 1st so we can update them, during message load
-//$count = loadAndIndexSlackUsers($token, $uid, $cookie, $client);
+$count = loadAndIndexSlackUsers($token, $uid, $cookie, $client);
 
-//echo date('Y-m-d H:i:s') ." loaded $count users \n";
+echo date('Y-m-d H:i:s') ." loaded $count users \n";
 
 $time = microtime(true);
 
