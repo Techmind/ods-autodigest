@@ -83,7 +83,7 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 		}
 
 		// ignore join message
-		if (isset($message['text']) && strpos('has joined the channel', $message['text']) !== false)
+		if (!empty($message['text']) && strpos($message['text'], 'has joined the channel') !== false)
 		{
 			continue;
 		}
