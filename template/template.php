@@ -13,7 +13,7 @@
 	<body>
 		<a href="./search.php">Search</a>
 		/ <a href="./top.php">Top (messages)</a>
-<!--		/ <a href="./top_users.php">Top (users)</a> -->
+		/ <a href="./top_users.php">Top (users)</a>
 		<br />
 
 		<?=$header?>
