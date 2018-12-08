@@ -1,6 +1,37 @@
-1) sudo apt-get install php
-2) install elasticsearch
-3) php -S 0.0.0.0:8000
+1) sudo apt-get install php php-curl
+2) sudo apt-get install elasticsearch; sudo service elasticsearch start
+3) to run web-interface on localhost on port 8000: php -S 0.0.0.0:8000
+4) launching: to populate elastic search database run this: php cron/load_data.php $WEB_API_TOKEN
+
+To get $WEB_API_TOKEN, check any xhr request from chrome's development console (ctrl+i default keybinding) and find 'token' parameter in post fields. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 TODO:
