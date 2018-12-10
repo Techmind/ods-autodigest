@@ -36,7 +36,10 @@ To get $WEB_API_TOKEN, check any xhr request from chrome's development console (
 
 TODO:
 
--1) logginh to separate file (with current date,so i cna laucnh this shit in screen and forget about it)
+
+-2) logginh to separate file (with current date,so i cna laucnh this shit in screen and forget about it)
+
+-1) use sql and not elastic
 
 0) 'hot topic detection' daily/weekly, by reactions/comment numbers and positivity/negativity, maybe by channel ?
 
