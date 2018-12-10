@@ -36,6 +36,7 @@ To get $WEB_API_TOKEN, check any xhr request from chrome's development console (
 
 TODO:
 
+-3) divide by # of messages ? so ratings is less scewed by users who message a lot ?
 
 -2) logginh to separate file (with current date,so i cna laucnh this shit in screen and forget about it)
 
