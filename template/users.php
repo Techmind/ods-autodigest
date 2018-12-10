@@ -13,7 +13,7 @@ foreach ($users as $user)
 		$user_html = "@" . $body['user'];
 	}
 
-	echo $user_html . var_export($user, true) . "<br /><br /`>";
+	echo $user_html .  " " . $user['real_name'] . " <b>" . $user[$type] . "</b><br /><br /`>";
 	
 }
 
