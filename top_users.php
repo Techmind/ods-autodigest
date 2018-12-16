@@ -5,6 +5,7 @@ include(__DIR__ . '/lib/incl.php');
 $config = include (__DIR__ . '/config/config.php');
 
 $type = isset($_GET['$type']) ? $_GET['$type'] : null;
+$date = isset($_GET['date']) ? $_GET['date'] : null;
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
 ob_start();
 $options = [
@@ -13,6 +14,10 @@ $options = [
 	'from_pos' => 'Positive reactions to messages created',
 	'from_neg' => 'Negative reactions to messages created'
 ];
+$dates = range(time() - 3600*24*365, time(), 3600*24*30);
+$dates = array_map(function ($time) { return date('Ym', $time);}, $dates);
+$dates = array_reverse($dates);
+$dates['total'] = 'total';
 ?>
 
 <form action="./top_users.php">
@@ -21,6 +26,13 @@ $options = [
 		<?php foreach ($options as $opt_type => $opt_name) :?>
 			<option value="<?=$opt_type?>" <?=(($type==$opt_type)?'selected="selected"':'')?>
 				><?=$opt_name?>
+			</option>
+		<?php endforeach; ?>
+	</select>
+	<select name="date">
+		<?php foreach ($dates as $opt_value) :?>
+			<option value="<?=$opt_value?>" <?=(($date==$opt_value)?'selected="selected"':'')?>
+			><?=$opt_value?>
 			</option>
 		<?php endforeach; ?>
 	</select>
@@ -38,22 +50,27 @@ if (isset($type))
 
 	$db = Elasticsearch\ClientBuilder::create()->build();
 
-        $params = [
-                'index' => 'users',
-                'type' => 'user',
-                'body' => [
-                        'size' => $limit,
-                        'query' => [
-                                'bool' => [
-                                        'must' => [
-                                        ],
-                                ]
-                        ],
-			'sort' => [
-                                [$type => 'desc']
-                        ]
-                ]
-        ];
+	if ($date != 'total')
+	{
+		$type = $type . '_' . $date;
+	}
+
+    $params = [
+            'index' => 'users',
+            'type' => 'user',
+            'body' => [
+                    'size' => $limit,
+                    'query' => [
+                            'bool' => [
+                                    'must' => [
+                                    ],
+                            ]
+                    ],
+		'sort' => [
+                            [$type => 'desc']
+                    ]
+            ]
+    ];
 
 	$pos = 1;
         if ($pos)
@@ -63,7 +80,7 @@ if (isset($type))
 
         $resp = $db->search($params);
 
-	$users = $resp['hits']['hits'];	
+	$users = $resp['hits']['hits'];
 
 	$content =  include(__DIR__ . '/template/users.php');
 } else {

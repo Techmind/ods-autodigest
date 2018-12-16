@@ -27,7 +27,9 @@
 		'heavy_minus_sign', 'wtf', 'hankey',
 		// jobs related
 		'chains', 'bombanoolo', 'harold', 'genious', 'pepe_sad', 'mickey', 'no',
-		'knife_fork_plate', 'parrotpoop'
+		'knife_fork_plate', 'parrotpoop',
+		// 2018
+		'ramen'
 	],
 	'emojis' => [
 		"bowtie" => "https:\/\/emoji.slack-edge.com\/T040HKJE3\/bowtie\/f3ec6f2bb0.png",

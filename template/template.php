@@ -16,6 +16,8 @@
 		/ <a href="./top_users.php">Top (users)</a>
 		<br />
 
+		Parsed channels: <?=implode(',', $config['channels'])?>
+
 		<?=$header?>
 
 		<?=$content?>

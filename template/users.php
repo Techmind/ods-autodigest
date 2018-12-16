@@ -1,9 +1,15 @@
 <?php
 ob_start();
 
-foreach ($users as $user)
+if ($date == 'total')
 {
-	$user = $user['_source'];
+	$date = '';
+}
+
+foreach ($users as $user_raw)
+{
+	$uid = $user_raw['_id'];
+	$user = $user_raw['_source'];
 	$reactions_html = '';
 	
 	if ($user)
@@ -13,7 +19,18 @@ foreach ($users as $user)
 		$user_html = "@" . $body['user'];
 	}
 
-	echo $user_html .  " " . $user['real_name'] . " <b>" . $user[$type] . "</b><br /><br /`>";
+	$search = "(search: <b> from:@".$user['name']. " ";
+	if ($date)
+	{
+		$date_frmt = substr($date, 0, 4) . "-" . substr($date, 4);
+		$search .= "after:$date_frmt-00 before:$date_frmt-31";
+	}
+	$search .= ")</b> UID: $uid";
+
+	echo $user_html .  " " . $user['real_name'] . " <b>" . $user[$type] . "</b>
+	
+	$search
+	<br /><br /`>";
 	
 }
 

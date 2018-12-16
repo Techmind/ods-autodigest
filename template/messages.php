@@ -59,9 +59,9 @@ foreach ($rows as $row)
 	foreach ($matches[0] as $match) {
 		$uid = substr($match, 2);
 
-		$user_comment = isset($users[$body['user']]) ? $users[$body['user']] : null;
+		$user_row = isset($users[$body['user']]) ? $users[$body['user']] : null;
 
-		$text = str_replace($match, $user['name'], $text);
+		$text = str_replace($match, $user_row['name'], $text);
 	}
 
 	$debug = '';

@@ -28,9 +28,10 @@ $responseMessages = createMessagesIndex($client);
 
 $responseUsers = createUsersIndex($client);
 
+echo date('Y-m-d H:i:s') ." re-loading users\n";
 // loading users 1st so we can update them, during message load
 $count = loadAndIndexSlackUsers($token, $uid, $cookie, $client);
-
+//
 echo date('Y-m-d H:i:s') ." loaded $count users \n";
 
 $time = microtime(true);
@@ -62,8 +63,4 @@ foreach ($channels as $channel_id => $channel_name)
 
 	echo date('Y-m-d H:i:s') . " $real messages from '$channel_name' saved to index\n";
 }
-
-//die();
-
-echo date('Y-m-d H:i:s') ." re-loading users\n";
 

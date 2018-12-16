@@ -6,15 +6,18 @@
  */
 function createMessagesIndex($client)
 {
-	try {
+	try
+	{
 		if ($client->indices()->exists(['index' => 'messages']))
 		{
 			return true;
 		}
-	} catch (Exception $e)
+	}
+	catch (Exception $e)
 	{
-		//var_dump('CATCH');die;
-		//var_dump($e);
+		var_dump('CATCH');
+		var_dump($e);
+		die();
 	}
 
 	$params = [
@@ -82,6 +85,8 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 	$count = 0;
 	$users_update = [];
 
+	$bulk_messages = [];
+
 	foreach ($all_messages as $message)
 	{
 		if (isset($message['subtype']) &&
@@ -106,13 +111,15 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 
 		$message_ts = $message['ts'];
 
-		if (floatval($message_ts) <= $last_ts)
+		if (floatval($message_ts) <= $last_ts && false)
 		{
 			break;
 		}
 
 		list($ts, $ts_float) = explode('.', $message_ts);
 		$ts_float = floatval("0.$ts_float") * 1000000;
+
+		$date_prefix = '_' . date('Ym', $ts);
 
 		$id = $channel_id . '-' . $message_ts . "-" . $message['user'] .
 
@@ -122,7 +129,7 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 		{
 			foreach ($message['reactions'] as $reaction)
 			{
-				
+
 				$is_pos = in_array($reaction['name'], $positive_reactions);
 				$is_neg = in_array($reaction['name'], $negative_reactions);
 				if ($is_pos)
@@ -135,51 +142,56 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 				}
 
 				$total += intval($reaction['count']);
-				
-				
-				foreach ($reaction['users'] as $from_uid)
-				{
-					if (!isset($users_update[$from_uid]['from_pos']))
-					{
-						$users_update[$from_uid]['from_pos'] = 0;
-						$users_update[$from_uid]['from_neg'] = 0;
-					}
-					$users_update[$from_uid]['from_pos'] += $is_pos ? 1 : 0;
-					$users_update[$from_uid]['from_neg'] += $is_neg ? 1 : 0;
-				}
 
-				
-				if (!isset($users_update[$user_id]['to_pos']))
+				foreach ([$date_prefix, ''] as $prefix)
 				{
-					$users_update[$user_id]['to_pos'] = 0;
-					$users_update[$user_id]['to_neg'] = 0;
+					foreach ($reaction['users'] as $from_uid)
+					{
+						if (!isset($users_update[$from_uid]['from_pos' . $prefix]))
+						{
+							$users_update[$from_uid]['from_pos' . $prefix] = 0;
+							$users_update[$from_uid]['from_neg' . $prefix] = 0;
+						}
+						$users_update[$from_uid]['from_pos' . $prefix] += $is_pos ? 1 : 0;
+						$users_update[$from_uid]['from_neg' . $prefix] += $is_neg ? 1 : 0;
+					}
+
+
+					if (!isset($users_update[$user_id]['to_pos' . $prefix]))
+					{
+						$users_update[$user_id]['to_pos' . $prefix] = 0;
+						$users_update[$user_id]['to_neg' . $prefix] = 0;
+					}
+					$users_update[$user_id]['to_pos' . $prefix] += $is_pos ? $reaction['count'] : 0;
+					$users_update[$user_id]['to_neg' . $prefix] += $is_neg ? $reaction['count'] : 0;
 				}
-				$users_update[$user_id]['to_pos'] += $is_pos ? 1 : 0;
-				$users_update[$user_id]['to_neg'] += $is_neg ? 1 : 0;
 			}
 		}
 
-		$params = [
-			'index' => 'messages',
-			'type' => 'message',
-			'id' => $id,
-			'body' => [
-				'body' => json_encode($message),
-				'ts' => intval($ts),
-				'positive_reaction_cnt' => $pos,
-				'negative_reaction_cnt' => $neg,
-				'total_reaction_cnt' => $total,
-				'channel_id' => $channel_id
+		$bulk_messages['body'][] = [
+			'index' => [
+				'_index' => 'messages',
+				'_type' => 'message',
+				'_id' => $id,
 			]
 		];
 
-
-		$resp = $client->index($params);
+		$bulk_messages['body'][] = [
+			'body' => json_encode($message),
+			'ts' => intval($ts),
+			'positive_reaction_cnt' => $pos,
+			'negative_reaction_cnt' => $neg,
+			'total_reaction_cnt' => $total,
+			'channel_id' => $channel_id
+		];
 
 		$count++;
-
-		// [TODO] do not ignore errors
 	}
+
+	$resp = $client->bulk($bulk_messages);
+
+	// [TODO] do not ignore errors
+
 	$ids = array_keys($users_update);
 
 	if ($ids)
@@ -190,16 +202,16 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 
 		foreach ($users_update as $uid => $update_row)
 		{
-			 $bulk['body'][] = [
-                                'index' => [
-                                        '_index' => 'users',
-                                        '_type' => 'user',
-                                        '_id' => $uid
-	                       ]
-        	         ];
+			$bulk['body'][] = [
+				'index' => [
+					'_index' => 'users',
+					'_type' => 'user',
+					'_id' => $uid
+				]
+			];
 
-                	$row = $users[$uid];
-		
+			$row = $users[$uid];
+
 			foreach ($update_row as $k => $v)
 			{
 				if (!isset($row[$k]))
@@ -211,6 +223,7 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 
 			$bulk['body'][] = $row;
 		}
+
 
 		$resp = $client->bulk($bulk);
 	}
@@ -245,7 +258,9 @@ function getLastIndexed($client, $index, $type, $condition, $ts_field = 'ts')
 	if (!empty($latest_msg['hits']['hits'][0]))
 	{
 		$last_found = $latest_msg['hits']['hits'][0]['_source'];
-	} else {
+	}
+	else
+	{
 		$last_found = null;
 	}
 
@@ -258,13 +273,15 @@ function getLastIndexed($client, $index, $type, $condition, $ts_field = 'ts')
  */
 function createUsersIndex($client)
 {
-	try 
+	try
 	{
 		if ($client->indices()->exists(['index' => 'users']))
-		{	
+		{
 			return true;
 		}
-	} catch (\Exception $e) {
+	}
+	catch (\Exception $e)
+	{
 		var_dump($e);
 	}
 
