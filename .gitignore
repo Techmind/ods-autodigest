@@ -1,3 +1,4 @@
 dumps/*
 config/.mine.cookie.php
+config/config_auth.php
 .idea

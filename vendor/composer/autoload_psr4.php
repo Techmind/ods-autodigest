@@ -6,9 +6,18 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'wrapi\\slack\\' => array($vendorDir . '/wrapi/slack/src'),
+    'wrapi\\' => array($vendorDir . '/palanik/wrapi/src'),
+    'Sabre\\Uri\\' => array($vendorDir . '/sabre/uri/lib'),
     'React\\Promise\\' => array($vendorDir . '/react/promise/src'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
+    'League\\OAuth2\\Client\\' => array($vendorDir . '/league/oauth2-client/src'),
     'GuzzleHttp\\Stream\\' => array($vendorDir . '/guzzlehttp/streams/src'),
     'GuzzleHttp\\Ring\\' => array($vendorDir . '/guzzlehttp/ringphp/src'),
+    'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
+    'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
+    'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'Elasticsearch\\' => array($vendorDir . '/elasticsearch/elasticsearch/src/Elasticsearch'),
+    'AdamPaterson\\OAuth2\\Client\\' => array($vendorDir . '/adam-paterson/oauth2-slack/src'),
 );

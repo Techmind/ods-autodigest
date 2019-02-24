@@ -1,4 +1,6 @@
 <?php return [
+	'digest_channel' => '#ods-api-test',
+	'slack_url' => "https://opendatascience.slack.com/",
 	'channels' => [
 		'C5VQ222UX' => 'article_essence',
 		'C04PE5M8V' => 'interesting_links',

@@ -1,5 +1,51 @@
 <?php
 
+
+/**
+ * @param $channel_id
+ * @param $last_ts
+ * @return array
+ */
+function loadSlackMessagesApi($channel_id, $api, $last_ts)
+{
+	$all_messages = [];
+
+	$latest = null;
+
+	do
+	{
+
+		$post = [
+			"channel" => $channel_id,
+			"count" => 1000,
+			"ignore_replies" => "true",
+			"include_pin_count" => "true",
+			"inclusive" => "true",
+			"oldest" => $last_ts,
+		];
+
+		if ($latest)
+		{
+			$post['latest'] = $latest;
+		}
+
+		$response = $api->channels->history($post);
+
+		$all_messages = array_merge($all_messages, $response['messages']);
+
+		$latest = $all_messages[count($all_messages) - 1]['ts'];
+
+		if ($latest < $last_ts)
+		{
+			break;
+		}
+
+	} while (count($response['messages']) > 1);
+
+	return $all_messages;
+}
+
+
 /**
  * @param $channel_id
  * @param $token
@@ -52,6 +98,7 @@ function loadSlackMessages($channel_id, $token, $cookie, $last_ts, $x_id)
 		}
 
 	} while (count($response['messages']) > 1);
+
 	return $all_messages;
 }
 

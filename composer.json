@@ -1,5 +1,7 @@
 {
     "require": {
-        "elasticsearch/elasticsearch": "~6.0"
+        "elasticsearch/elasticsearch": "~6.0",
+        "wrapi/slack": "^1.0",
+        "adam-paterson/oauth2-slack": "^1.1"
     }
 }
