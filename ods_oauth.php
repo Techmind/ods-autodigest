@@ -9,7 +9,7 @@ session_start();
  
 $provider = new \AdamPaterson\OAuth2\Client\Provider\Slack([
     'clientId'          => '559166861203.558719063889',
-    'clientSecret'      => 'd95dd41958b8148d10559d7655b4de15',
+    'clientSecret'      => 'regenerated',
     'redirectUri'       => 'http://37.147.114.9/ods_oauth.php',
 ]);
  
