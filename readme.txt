@@ -1,7 +1,17 @@
 1) sudo apt-get install php php-curl
 2) sudo apt-get install elasticsearch; sudo service elasticsearch start
 3) to run web-interface on localhost on port 8000: php -S 0.0.0.0:8000
-4) launching: to populate elastic search database run this: php cron/load_data.php $WEB_API_TOKEN
+4) cp config/config_auth.php.tmpl config/config_auth.php
+5) vim config/config_auth.php
+- add token_read for reading data (use your user token) & token_post for writing (users/bot token)
+6) launching: to populate elastic search database run this: php cron/load_data_api.php;
+7) to create digest(edit 'ods_post_digest.php' to change channel name) php ods_post_digest.php
+
+crontab:
+50 11 * * 1     root    service elasticsearch start
+10 12 * * 1     root    service elasticsearch stop
+00 12 * * 1     $USERNAME        cd $DIR; php cron/load_data_api.php >> /tmp/digest.txt; php ods_post_digest.php >> /tmp/digest.txt
+
 
 To get $WEB_API_TOKEN, check any xhr request from chrome's development console (ctrl+i default keybinding) and find 'token' parameter in post fields. 
 
