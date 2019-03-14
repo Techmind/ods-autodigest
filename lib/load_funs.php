@@ -40,6 +40,11 @@ function loadSlackMessagesApi($channel_id, $api, $last_ts)
 			break;
 		}
 
+		if (count($all_messages) >= 1000)
+		{
+			echo date('Y-m-d H:i:s') ." ..." . count($all_messages) . "\n";
+		}
+
 	} while (count($response['messages']) > 1);
 
 	return $all_messages;

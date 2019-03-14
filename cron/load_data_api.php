@@ -49,12 +49,43 @@ foreach ($channels as $channel_id => $channel_name)
 
 	//var_dump($decoded);
 
+	echo date('Y-m-d H:i:s') ." Loading #$channel_name\n";
+
 	$all_messages = loadSlackMessagesApi($channel_id, $slack, $last_ts);
 
 	echo date('Y-m-d H:i:s') ." Loaded: name - $channel_name, cnt - " . count($all_messages) . "\n";
 
-	$real = indexMessages($client, $all_messages, $channel_id, $positive_reactions, $negative_reactions, $last_ts);
+	list($count, $missing_users) = indexMessages($client, $all_messages, $channel_id, $positive_reactions, $negative_reactions, $last_ts);
 
-	echo date('Y-m-d H:i:s') . " $real messages from '$channel_name' saved to index\n";
+	echo date('Y-m-d H:i:s') . " $count messages from '$channel_name' saved to index\n";
+
+	// calculate average stats and print for channels
+
+	$resp = $client->search([
+		'index' => 'messages',
+		'type' => 'message',
+		'size' => 0,
+		'body' => '{
+			"query" : {
+				"constant_score" : {
+					"filter" : {
+						"match" : { "channel_id" : "'.$channel_id.'" }
+					}
+				}
+			},
+			"aggs" : {
+				"positive_reaction_cnt_sum" : {
+					"sum" : {
+						"script" : {
+						   "source": "doc.positive_reaction_cnt.value"
+						}
+					}
+				}
+			}}']);
+
+	$sum = $resp['aggregations']['positive_reaction_cnt_sum']['value'];
+	$hits = $resp['hits']['total'];
+
+	$avg = ceil($sum / $hits);
+	echo "Avg pos reactions: $avg hits: $hits\n";
 }
-

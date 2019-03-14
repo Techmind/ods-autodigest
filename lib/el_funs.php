@@ -194,6 +194,7 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 
 	$ids = array_keys($users_update);
 
+	$users_missing = [];
 	if ($ids)
 	{
 
@@ -210,25 +211,42 @@ function indexMessages($client, $all_messages, $channel_id, $positive_reactions,
 				]
 			];
 
-			$row = $users[$uid];
-
-			foreach ($update_row as $k => $v)
+			if (!isset($users[$uid]))
 			{
-				if (!isset($row[$k]))
-				{
-					$row[$k] = 0;
-				}
-				$row[$k] += $v;
-			}
 
-			$bulk['body'][] = $row;
+			}
+			else
+			{
+
+				$row = $users[$uid];
+
+				foreach ($update_row as $k => $v)
+				{
+					if (!isset($row[$k]))
+					{
+						$row[$k] = 0;
+					}
+					$row[$k] += $v;
+				}
+
+				$bulk['body'][] = $row;
+			}
 		}
 
 
-		$resp = $client->bulk($bulk);
+		try
+		{
+			$resp = $client->bulk($bulk);
+		}
+		catch (\Exception $e)
+		{
+			print_r($bulk);
+			throw $e;
+		}
+
 	}
 
-	return $count;
+	return [$count, $users_missing];
 }
 
 /**

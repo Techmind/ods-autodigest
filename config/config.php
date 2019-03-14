@@ -6,7 +6,7 @@
 		'C04PE5M8V' => 'interesting_links',
 		'C047H3N8L' => 'deep_learning',
 		'C0SGCGB52' => 'career',
-//		'C040HKJF1' => '_random_talks', // 93k messages, NOPE!
+		'C040HKJF1' => '_random_talks', // 93k messages, NOPE!
 		'C04DA5FUF' => '_jobs',
 		'C047H3DP4' => 'theory_and_practice',
 	],
@@ -16,6 +16,7 @@
 	],
 	'positive_reactions' => [
 		'fire', 'fireball', 'heavy_plus_sign', 'notbad', 'muscle', 'muscle::skin-tone-6', 'take-my-money', 'joy', 'feelsgoodmeme',
+		'muscle',
 		// wtf ?
 		'+1', '+1::skin-tone-2', '+1::skin-tone-3', '+1::skin-tone-6',
 
